@@ -3,15 +3,24 @@ import { useStudio } from '../../store/StudioContext';
 import { useWaveCanvas } from '../../hooks/useWaveCanvas';
 
 export default function WaveCanvas() {
-  const { compiledRef, stateRef, playingRef, stepRef } = useStudio();
+  const { compiledRef, stateRef, playingRef, stepRef, stepTimeRef, state } = useStudio();
 
-  const { canvasRef, drawCanvas } = useWaveCanvas({
-    compiledRef, stateRef, playingRef, stepRef,
+  const { canvasRef, drawCanvas, startRAF, stopRAF } = useWaveCanvas({
+    compiledRef, stateRef, playingRef, stepRef, stepTimeRef,
   });
 
-  // Redraw static frame whenever equation changes
+  // Start/stop the 60fps RAF loop based on transport state
   useEffect(() => {
-    drawCanvas();
+    if (state.playing) {
+      startRAF();
+    } else {
+      stopRAF();
+    }
+  }, [state.playing, startRAF, stopRAF]);
+
+  // Redraw static frame on equation/param changes when not playing
+  useEffect(() => {
+    if (!state.playing) drawCanvas();
   });
 
   return (

@@ -27,6 +27,7 @@ export function StudioProvider({ children }) {
   const compiledRef   = useRef(null);
   const playingRef    = useRef(false);
   const stepRef       = useRef(0);
+  const stepTimeRef   = useRef(0);   // performance.now() when last step fired
   const canvasRef     = useRef(null);
   const rafRef        = useRef(null);
 
@@ -132,9 +133,9 @@ export function StudioProvider({ children }) {
     const compiled = compiledRef.current;
     const s = stateRef.current;
 
-    // Equation waveform
+    // ── Equation waveform (dimmer while playing so the dot stands out) ──
     if (compiled) {
-      ctx.strokeStyle = '#7F77DD88';
+      ctx.strokeStyle = playingRef.current ? '#7F77DD55' : '#7F77DD88';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let x = 0; x < W; x++) {
@@ -146,12 +147,12 @@ export function StudioProvider({ children }) {
       ctx.stroke();
     }
 
-    // Live analyser overlay
+    // ── Live analyser overlay ──
     const analyser = engine.analyser;
     if (analyser && playingRef.current) {
       const data = analyser.getValue();
-      ctx.strokeStyle = '#1D9E75';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#1D9E7588';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let i = 0; i < data.length; i++) {
         const x = (i / data.length) * W;
@@ -161,15 +162,74 @@ export function StudioProvider({ children }) {
       ctx.stroke();
     }
 
-    // Step position indicator
-    if (playingRef.current) {
-      const xPos = (stepRef.current / 16) * W;
-      ctx.strokeStyle = '#EF9F2766';
-      ctx.lineWidth = 1;
+    // ── Waveform position indicator ──
+    if (playingRef.current && compiled) {
+      const bpmVal    = s.bpm;
+      const stepDurMs = (60 / (bpmVal * 4)) * 1000;           // 16n in ms
+      const elapsed   = performance.now() - stepTimeRef.current;
+      const subProg   = Math.min(Math.max(elapsed / stepDurMs, 0), 1);
+      const curStep   = stepRef.current;
+
+      // Static trigger point — where this step actually fires on the equation
+      const dotFrac = curStep / 16;
+      const dotX    = dotFrac * W;
+      const dotT    = dotFrac * 4 * Math.PI * s.tSpeed;
+      const dotV    = evalEq(compiled, dotT);
+      const dotY    = ((1 - dotV) / 2) * H;
+
+      // Animated playhead — glides smoothly to next step along the curve
+      const animFrac = ((curStep + subProg) % 16) / 16;
+      const animX    = animFrac * W;
+      const animT    = animFrac * 4 * Math.PI * s.tSpeed;
+      const animV    = evalEq(compiled, animT);
+      const animY    = ((1 - animV) / 2) * H;
+
+      // Dashed crosshair at the trigger point
+      ctx.save();
+      ctx.strokeStyle = '#EF9F2738';
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([4, 5]);
       ctx.beginPath();
-      ctx.moveTo(xPos, 0);
-      ctx.lineTo(xPos, H);
+      ctx.moveTo(0, dotY);   ctx.lineTo(W, dotY);   // horizontal — pitch level
+      ctx.moveTo(dotX, 0);   ctx.lineTo(dotX, H);   // vertical — time position
       ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Animated ghost dot (smaller, trails ahead along the waveform)
+      ctx.save();
+      ctx.shadowColor = '#EF9F27';
+      ctx.shadowBlur  = 8;
+      ctx.fillStyle   = '#EF9F2777';
+      ctx.beginPath();
+      ctx.arc(animX, animY, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Main glowing dot at trigger position
+      ctx.save();
+      ctx.shadowColor = '#EF9F27';
+      ctx.shadowBlur  = 22;
+      ctx.fillStyle   = '#EF9F27';
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      // White ring
+      ctx.shadowBlur    = 4;
+      ctx.strokeStyle   = '#ffffff99';
+      ctx.lineWidth     = 1.5;
+      ctx.stroke();
+      ctx.restore();
+
+      // Labels: t-value and amplitude
+      const tStr = dotT.toFixed(2);
+      const aStr = (dotV >= 0 ? '+' : '') + dotV.toFixed(3);
+      const lx   = dotX > W - 95 ? dotX - 96 : dotX + 9;
+      const ly   = dotY < 18 ? dotY + 18 : dotY - 7;
+      ctx.font      = `9px 'JetBrains Mono', ui-monospace, monospace`;
+      ctx.fillStyle = '#EF9F27cc';
+      ctx.fillText(`t = ${tStr}`, lx, ly);
+      ctx.fillText(`a = ${aStr}`, lx, ly + 11);
     }
   }, []);
 
@@ -205,7 +265,8 @@ export function StudioProvider({ children }) {
 
       // Connect step-highlight callback
       engine.onStep = (idx) => {
-        stepRef.current = idx;
+        stepRef.current   = idx;
+        stepTimeRef.current = performance.now();
         document.querySelectorAll('.step-btn').forEach((b) => b.classList.remove('cur'));
         document.querySelectorAll(`.step-btn[data-idx="${idx}"]`).forEach((b) => b.classList.add('cur'));
       };
@@ -221,7 +282,8 @@ export function StudioProvider({ children }) {
       Tone.Transport.start();
     }
 
-    playingRef.current = true;
+    stepTimeRef.current = performance.now();
+    playingRef.current  = true;
     dispatch({ type: 'SET_PLAYING', payload: true });
     dispatch({ type: 'SET_LOADING', payload: false });
     startRAF();
@@ -257,7 +319,8 @@ export function StudioProvider({ children }) {
       engine.buildMelody(type, stateRef.current.adsr);
       engine.buildSequence();
       engine.onStep = (idx) => {
-        stepRef.current = idx;
+        stepRef.current     = idx;
+        stepTimeRef.current = performance.now();
         document.querySelectorAll('.step-btn').forEach((b) => b.classList.remove('cur'));
         document.querySelectorAll(`.step-btn[data-idx="${idx}"]`).forEach((b) => b.classList.add('cur'));
       };
@@ -338,6 +401,7 @@ export function StudioProvider({ children }) {
     compiledRef,
     playingRef,
     stepRef,
+    stepTimeRef,
     canvasRef,
     // Actions
     handleEqChange,

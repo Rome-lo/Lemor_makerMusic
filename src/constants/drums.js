@@ -61,6 +61,12 @@ export const KICK_TYPES = {
     note: 'C1', dur: '8n', vol: 0.85,
     envelope: { attack: 0.001, decay: 0.30, sustain: 0,   release: 0.02 },
   },
+  dubstep: {
+    label: 'Dubstep', desc: 'Bombo seco y devastador, impacto máximo sin cola',
+    pitchDecay: 0.022, octaves: 9,
+    note: 'C1', dur: '16n', vol: 0.98,
+    envelope: { attack: 0.001, decay: 0.07, sustain: 0,   release: 0.02 },
+  },
 };
 
 // ── Configuraciones de cajas (NoiseSynth + filtro HP) ────────────────────────
@@ -125,6 +131,12 @@ export const SNARE_TYPES = {
     noiseType: 'white', hpFreq: 1800,
     dur: '8n', vol: 0.70,
     envelope: { attack: 0.001, decay: 0.22, sustain: 0, release: 0.08 },
+  },
+  halfstep: {
+    label: 'Halfstep', desc: 'Caja dubstep seca y agresiva, sin reverb, máxima densidad',
+    noiseType: 'white', hpFreq: 2400,
+    dur: '16n', vol: 0.85,
+    envelope: { attack: 0.001, decay: 0.055, sustain: 0, release: 0.01 },
   },
 };
 
