@@ -1,0 +1,71 @@
+export const BASS_TYPES = {
+  sub: {
+    label: 'Sub',
+    desc: 'Sine puro muy profundo, sin armónicos. Ideal para sub-graves electrónicos.',
+    oscType: 'sine',
+    envelope: { attack: 0.01, decay: 0.4, sustain: 0.70, release: 0.5 },
+    filterFreq: 180,
+    vol: 0.85,
+  },
+  synth: {
+    label: 'Synth',
+    desc: 'Sierra analógica con body brillante y presencia. Bajo polivalente.',
+    oscType: 'sawtooth',
+    envelope: { attack: 0.005, decay: 0.2, sustain: 0.70, release: 0.3 },
+    filterFreq: 650,
+    vol: 0.80,
+  },
+  acid: {
+    label: 'Acid',
+    desc: 'Cuadrada con filtro resonante, el bajo acid house / techno clásico.',
+    oscType: 'square',
+    envelope: { attack: 0.001, decay: 0.18, sustain: 0.60, release: 0.2 },
+    filterFreq: 420,
+    vol: 0.78,
+  },
+  pluck: {
+    label: 'Pluck',
+    desc: 'Bajo pulsado tipo Karplus-Strong. Ataque percutivo, decay natural.',
+    oscType: 'pluck',
+    envelope: null,
+    filterFreq: 900,
+    vol: 0.82,
+  },
+  k808: {
+    label: '808',
+    desc: 'Sub sine con sustain largo, el bajo 808 clásico del trap / R&B.',
+    oscType: 'sine',
+    envelope: { attack: 0.001, decay: 1.2, sustain: 0.70, release: 1.0 },
+    filterFreq: 140,
+    vol: 0.90,
+  },
+  reese: {
+    label: 'Reese',
+    desc: 'Dos sierras ligeramente detuneadas, el bajo reese del DnB y dubstep.',
+    oscType: 'fatsawtooth',
+    envelope: { attack: 0.005, decay: 0.2, sustain: 0.90, release: 0.3 },
+    filterFreq: 550,
+    vol: 0.75,
+  },
+  fingered: {
+    label: 'Fingered',
+    desc: 'Triángulo con ataque rápido, simula el bajo eléctrico tocado con dedos.',
+    oscType: 'triangle',
+    envelope: { attack: 0.001, decay: 0.25, sustain: 0.35, release: 0.45 },
+    filterFreq: 700,
+    vol: 0.82,
+  },
+  wobble: {
+    label: 'Wobble',
+    desc: 'Sierra con LFO sobre el filtro, el wobble bass del dubstep sincronizado al BPM.',
+    oscType: 'sawtooth',
+    envelope: { attack: 0.005, decay: 0.3, sustain: 0.80, release: 0.25 },
+    filterFreq: 300,
+    vol: 0.78,
+    wobble: true,
+  },
+};
+
+export const bassOpts = Object.entries(BASS_TYPES).map(([v, o]) => ({
+  v, label: o.label, desc: o.desc,
+}));
