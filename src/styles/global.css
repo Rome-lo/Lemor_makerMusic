@@ -98,17 +98,93 @@ h1 {
 .eq-input:focus { border-color: var(--pur); }
 .eq-input.error  { border-color: var(--red); }
 .eq-error { color: var(--red); font-size: 0.75rem; margin: 0.3rem 0; }
-.eq-lib-select {
+/* ── EqLib custom dropdown ───────────────────────────────────────────────── */
+.eqlib-wrap { position: relative; flex-shrink: 0; }
+
+.eqlib-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   background: var(--bg3);
   border: 1px solid var(--bdr);
   border-radius: 5px;
   color: var(--dim);
   font-family: inherit;
   font-size: 0.75rem;
-  padding: 0.3rem 0.4rem;
-  flex-shrink: 0;
-  outline: none;
+  padding: 0.3rem 0.5rem;
   cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.eqlib-btn:hover { border-color: var(--pur); color: var(--txt); }
+.eqlib-arrow { font-size: 0.6rem; }
+
+.eqlib-panel {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  width: 290px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px #00000099;
+  z-index: 60;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bdr) transparent;
+}
+
+.eqlib-group-label {
+  position: sticky;
+  top: 0;
+  padding: 0.45rem 0.75rem 0.2rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  background: var(--bg2);
+  border-top: 1px solid var(--bdr);
+}
+.eqlib-group:first-child .eqlib-group-label { border-top: none; }
+
+.eqlib-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.28rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--txt);
+  font-family: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  transition: background 0.08s;
+}
+.eqlib-item:hover { background: var(--bg3); }
+.eqlib-item:hover .eqlib-preview path { stroke: var(--pur); }
+
+.eqlib-preview {
+  flex-shrink: 0;
+  background: #0a0a12;
+  border: 1px solid var(--bdr);
+  border-radius: 3px;
+  display: block;
+}
+.eqlib-preview path {
+  stroke: #7F77DD88;
+  stroke-width: 1.5;
+  fill: none;
+  transition: stroke 0.1s;
+}
+
+.eqlib-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Function chips ─────────────────────────────────────────────────────── */

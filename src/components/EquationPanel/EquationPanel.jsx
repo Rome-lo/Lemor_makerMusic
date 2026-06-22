@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { useStudio } from '../../store/StudioContext';
-import { EQ_LIB } from '../../constants/equations';
 import Panel from '../ui/Panel';
 import WaveCanvas from './WaveCanvas';
 import FunctionChips from './FunctionChips';
+import EqLibSelect from './EqLibSelect';
 
 export default function EquationPanel() {
   const { state, dispatch, handleEqChange } = useStudio();
@@ -39,16 +39,7 @@ export default function EquationPanel() {
           spellCheck={false}
           placeholder="sin(t)"
         />
-        <select
-          className="eq-lib-select"
-          value=""
-          onChange={(e) => { if (e.target.value) handleEqChange(e.target.value); }}
-        >
-          <option value="">Biblioteca…</option>
-          {EQ_LIB.map((eq, i) => (
-            <option key={i} value={eq}>{eq.slice(0, 42)}</option>
-          ))}
-        </select>
+        <EqLibSelect onSelect={handleEqChange} />
       </div>
 
       {state.eqError && (
